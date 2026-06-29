@@ -10,7 +10,7 @@ export const useRouteMatch = () => {
   const pathname = usePathname();
 
   const isActive = useCallback(
-    (href: string) => pathname.startsWith(href),
+    (href: string) => pathname === href || pathname.startsWith(`${href}/`),
     [pathname]
   );
 

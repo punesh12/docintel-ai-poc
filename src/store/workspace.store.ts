@@ -9,8 +9,10 @@ interface WorkspaceState {
   documents: Document[];
   openedTabs: string[];
   activeDocumentId: string | null;
+  chatSheetOpen: boolean;
 
   setDocuments: (documents: Document[]) => void;
+  setChatSheetOpen: (open: boolean) => void;
 
   openTab: (documentId: string) => void;
   closeTab: (documentId: string) => void;
@@ -22,8 +24,11 @@ export const useWorkspaceStore = create<WorkspaceState>((set) => ({
   documents: [],
   openedTabs: [],
   activeDocumentId: null,
+  chatSheetOpen: false,
 
   setDocuments: (documents) => set({ documents }),
+
+  setChatSheetOpen: (open) => set({ chatSheetOpen: open }),
 
   openTab: (documentId) =>
     set((state) => {

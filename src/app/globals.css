@@ -72,6 +72,7 @@
   --color-on-surface-variant: var(--on-surface-variant);
   --color-primary: var(--primary);
   --color-primary-container: var(--primary-container);
+  --color-primary-fixed: var(--primary-fixed);
   --color-on-primary: var(--on-primary);
   --color-secondary: var(--secondary);
   --color-secondary-container: var(--secondary-container);
@@ -163,6 +164,14 @@ button:disabled,
   font-size: 13px;
   font-weight: 450;
   line-height: 20px;
+}
+
+.nav-link-active {
+  color: var(--primary-container);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--primary-container);
+  text-underline-offset: 4px;
 }
 
 

@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { Sparkles } from "lucide-react";
-import { navLinkClassName } from "@/components/layout/NavLink";
+import { NavLink } from "@/components/layout/NavLink";
 import { useRouteMatch } from "@/hooks/useRouteMatch";
-import { cn } from "@/utils/cn";
 
 const NAV_ITEMS = [
   { href: "/upload", label: "Upload" },
@@ -27,16 +26,13 @@ export const AppHeader = () => {
 
       <nav className="flex items-center gap-1">
         {NAV_ITEMS.map(({ href, label }) => (
-          <Link
+          <NavLink
             key={href}
             href={href}
-            className={cn(
-              navLinkClassName(isActive(href)),
-              "px-4 py-2 text-body-md"
-            )}
-          >
-            {label}
-          </Link>
+            label={label}
+            active={isActive(href)}
+            className="px-4 py-2 text-body-md"
+          />
         ))}
       </nav>
     </header>

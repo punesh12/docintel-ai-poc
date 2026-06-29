@@ -19,10 +19,8 @@ interface NavLinkProps {
  */
 export const navLinkClassName = (active: boolean, extra?: string) =>
   cn(
-    "rounded-lg font-medium transition-colors",
-    active
-      ? "bg-primary-fixed/60 text-primary-container"
-      : "text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface",
+    "rounded-lg transition-colors",
+    active ? "nav-link-active" : "font-medium text-on-surface-variant no-underline hover:text-on-surface",
     extra
   );
 
