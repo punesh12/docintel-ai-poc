@@ -1,0 +1,5 @@
+# Minimal config for remote migrations (project ref from NEXT_PUBLIC_SUPABASE_URL)
+project_id = "vahdwlspnixkednvnpue"
+
+[db]
+major_version = 15

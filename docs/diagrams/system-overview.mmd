@@ -1,0 +1,37 @@
+flowchart TB
+  subgraph Browser["Next.js App (Browser)"]
+    Upload["/upload<br/>Upload Module"]
+    Library["/library<br/>Library Module"]
+    Workspace["/workspace<br/>Tab Viewer"]
+    API["/api/pdf<br/>PDF Proxy"]
+
+    subgraph State["Client State"]
+      Zustand["Zustand<br/>upload + workspace stores"]
+      Query["TanStack Query<br/>useDocuments"]
+    end
+
+    subgraph Services["Services"]
+      StorageSvc["storage.service"]
+      DocSvc["document.service"]
+    end
+
+    PDFjs["PDF.js iframe<br/>public/pdfjs"]
+  end
+
+  subgraph Supabase["Supabase"]
+    Storage["Storage Bucket<br/>documents/"]
+    DB[("Postgres<br/>documents table")]
+  end
+
+  Upload --> Zustand
+  Library --> Query
+  Workspace --> Zustand
+  Query --> DocSvc
+  Zustand --> DocSvc
+  Upload --> StorageSvc
+
+  StorageSvc --> Storage
+  DocSvc --> DB
+  Workspace --> PDFjs
+  PDFjs --> API
+  API --> Storage

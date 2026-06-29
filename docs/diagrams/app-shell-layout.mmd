@@ -1,0 +1,16 @@
+flowchart TB
+  subgraph Shell["AppShell"]
+    Header["AppHeader<br/>Logo · Upload · Library · Viewer"]
+
+    subgraph Body["flex row"]
+      Sidebar["LibrarySidebar<br/>collapsible · Library link"]
+      subgraph MainCol["main column"]
+        Main["Page content<br/>upload / library / workspace"]
+        Footer["StatusFooter"]
+      end
+    end
+  end
+
+  Header --> Body
+  Sidebar --> Main
+  Main --> Footer

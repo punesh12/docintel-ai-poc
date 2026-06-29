@@ -1,0 +1,26 @@
+flowchart TB
+  subgraph UploadState["upload.store (Zustand)"]
+    Items["items: Map of UploadItem"]
+    Filters["search · filter · concurrency"]
+  end
+
+  subgraph WorkspaceState["workspace.store (Zustand)"]
+    Docs["documents mirror"]
+    Tabs["openedTabs · activeDocumentId"]
+  end
+
+  subgraph ServerState["TanStack Query"]
+    Q["queryKey: documents"]
+    Poll["refetchInterval when processing"]
+  end
+
+  UploadMgr["UploadManager"] -->|progress events| UploadState
+  UploadState --> UploadUI["Upload page components"]
+
+  Q -->|fetchDocuments| DocSvc["document.service"]
+  DocSvc --> WorkspaceState
+  Q --> Poll
+
+  WorkspaceState --> TabsUI["DocumentTabs"]
+  WorkspaceState --> PDFUI["PDFViewer"]
+  Hooks["useWorkspaceTabs · useOpenDocument"] --> WorkspaceState

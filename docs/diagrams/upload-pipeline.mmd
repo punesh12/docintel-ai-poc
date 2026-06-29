@@ -1,0 +1,15 @@
+flowchart TD
+  A["User drops / selects PDFs"] --> B["validatePdfFiles()"]
+  B -->|invalid| C["Show validation errors"]
+  B -->|valid| D["UploadManager.addFiles()"]
+  D --> E["Upload queue<br/>upload.store"]
+  E --> F{"Concurrency pool<br/>(N workers)"}
+  F --> G["storage.service.upload()<br/>XHR + progress"]
+  G --> H["Supabase Storage"]
+  G --> I["document.service.register()"]
+  I --> J[("documents table<br/>status: processing")]
+  J --> K["Mark ready / failed"]
+  K --> L["useDocuments poll / invalidate"]
+  L --> M["Library + Workspace update"]
+
+  E --> N["UploadQueue UI<br/>stats · toolbar · table"]

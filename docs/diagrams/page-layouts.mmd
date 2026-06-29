@@ -1,0 +1,25 @@
+flowchart LR
+  subgraph UploadPage["Upload Page"]
+    direction TB
+    UH["PageHeader"]
+    subgraph UBody["Body"]
+      direction LR
+      ULeft["Dropzone · Validation · Presets"]
+      URight["StatsBar · Toolbar · Queue Table"]
+    end
+    UH --> UBody
+  end
+
+  subgraph LibraryPage["Library Page"]
+    direction TB
+    LH["PageHeader + Upload CTA"]
+    LT["Document table<br/>Name · Size · Status · Open"]
+    LH --> LT
+  end
+
+  subgraph WorkspacePage["Workspace Page"]
+    direction TB
+    TB["DocumentTabs<br/>tabs + picker"]
+    PV["PDFViewer iframe<br/>active tab only"]
+    TB --> PV
+  end

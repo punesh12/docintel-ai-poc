@@ -1,0 +1,11 @@
+flowchart LR
+  Start([Start]) --> Upload["/upload<br/>Drop PDFs"]
+  Upload --> Queue["Watch queue<br/>progress & stats"]
+  Queue --> Library["/library<br/>See documents"]
+  Library --> Open["Click Open"]
+  Open --> Workspace["/workspace<br/>PDF in tab"]
+  Workspace --> Tabs["Open more tabs<br/>via + picker"]
+  Tabs --> Switch["Switch / close tabs"]
+  Switch --> Workspace
+  Workspace --> Library
+  Library --> Upload

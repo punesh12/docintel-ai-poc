@@ -1,0 +1,21 @@
+sequenceDiagram
+  actor User
+  participant Library as Library / Tab Picker
+  participant Store as workspace.store
+  participant Page as /workspace
+  participant Builder as buildPdfViewerSrc()
+  participant Iframe as PDF.js iframe
+  participant Proxy as /api/pdf
+  participant SB as Supabase Storage
+
+  User->>Library: Open document
+  Library->>Store: openTab(documentId)
+  Store->>Page: visibleTabs + activeDocumentId
+  Page->>Builder: publicUrl + origin
+  Builder->>Iframe: viewer.html?file=absolute proxy URL
+  Iframe->>Proxy: GET /api/pdf?url=encoded Supabase URL
+  Proxy->>Proxy: Validate host + storage path
+  Proxy->>SB: fetch PDF bytes
+  SB-->>Proxy: application/pdf
+  Proxy-->>Iframe: stream PDF
+  Iframe-->>User: Render pages

@@ -1,0 +1,19 @@
+stateDiagram-v2
+  [*] --> uploading: File queued
+  uploading --> processing: Storage upload complete
+  processing --> ready: public_url available
+  processing --> failed: Error
+  uploading --> failed: Upload error
+  ready --> [*]: User views in workspace
+  failed --> [*]
+
+  note right of ready
+    Library: Open enabled
+    Picker: openable
+    Viewer: PDF preview
+  end note
+
+  note right of processing
+    Library: Open disabled
+    Picker: pending or openable if URL exists
+  end note
