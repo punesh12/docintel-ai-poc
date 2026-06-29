@@ -1,9 +1,8 @@
 import { v4 as uuidv4 } from "uuid";
 import {
   uploadPdfToStorage,
-  triggerAIProcessing,
 } from "@/services/storage.service";
-import { registerDocument, updateDocumentStatus } from "@/services/document.service";
+import { registerDocument } from "@/services/document.service";
 import type { UploadProgressEvent, UploadManagerConfig } from "@/types";
 import { UPLOAD_CONCURRENCY, UPLOAD_MAX_RETRIES } from "@/utils/constants";
 
@@ -169,14 +168,17 @@ class UploadManager {
 
       if (this.cancelledIds.has(itemId) || this.pausedItemIds.has(itemId)) return;
 
+      const now = new Date().toISOString();
+
       await registerDocument({
         id: result.documentId,
         name: file.name,
         size: file.size,
         storagePath: result.storagePath,
         publicUrl: result.publicUrl,
-        status: "processing",
-        uploadedAt: new Date().toISOString(),
+        status: "ready",
+        uploadedAt: now,
+        processedAt: now,
       });
 
       this.emit({
@@ -185,10 +187,6 @@ class UploadManager {
         status: "completed",
         documentId: result.documentId,
       });
-
-      triggerAIProcessing(result.documentId)
-        .then(() => updateDocumentStatus(result.documentId, "ready"))
-        .catch(() => updateDocumentStatus(result.documentId, "ready"));
     } catch (error) {
       if (this.pausedItemIds.has(itemId)) return;
 

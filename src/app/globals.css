@@ -77,6 +77,7 @@
   --color-secondary-container: var(--secondary-container);
   --color-tertiary-container: var(--tertiary-container);
   --color-error: var(--error);
+  --color-on-error: var(--on-error);
   --color-error-container: var(--error-container);
   --color-outline: var(--outline);
   --color-outline-variant: var(--outline-variant);
@@ -98,6 +99,16 @@ body {
   font-family: var(--font-inter), system-ui, sans-serif;
   font-size: 14px;
   line-height: 22px;
+}
+
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]) {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
 }
 
 /* Typography scale */

@@ -21,7 +21,7 @@ interface UploadItemRowProps {
 const statusConfig = {
   queued: { label: "Queued", variant: "queued" as const },
   uploading: { label: "Uploading", variant: "uploading" as const },
-  completed: { label: "AI Processing", variant: "processing" as const },
+  completed: { label: "Complete", variant: "ready" as const },
   failed: { label: "Failed", variant: "failed" as const },
   cancelled: { label: "Cancelled", variant: "cancelled" as const },
   paused: { label: "Paused", variant: "paused" as const },
@@ -30,7 +30,7 @@ const statusConfig = {
 const iconColor = {
   queued: "text-gray-400",
   uploading: "text-blue-500",
-  completed: "text-indigo-500",
+  completed: "text-emerald-500",
   failed: "text-red-500",
   cancelled: "text-gray-400",
   paused: "text-amber-500",
@@ -163,7 +163,7 @@ export const UploadItemRow = memo(function UploadItemRow({
 
       {/* Action */}
       <div className="flex justify-end">
-        {item.status === "failed" ? (
+        {item.status === "completed" ? null : item.status === "failed" ? (
           <button
             type="button"
             onClick={() => onRetry(item.id)}

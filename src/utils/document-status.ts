@@ -50,8 +50,8 @@ export const getPreviewMessage = (document: Document | null) => {
 
 /** Maps `DocumentStatus` to `StatusChip` variant keys. */
 export const documentStatusChipVariant = {
-  ready: "processing" as const,
-  processing: "uploading" as const,
+  ready: "ready" as const,
+  processing: "processing" as const,
   uploading: "uploading" as const,
   failed: "failed" as const,
 };

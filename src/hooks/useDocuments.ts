@@ -1,7 +1,8 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { fetchDocuments } from "@/services/document.service";
+import { useCallback, useEffect } from "react";
+import { deleteDocument, fetchDocumentsFromApi } from "@/services/document.service";
 import { useWorkspaceStore } from "@/store/workspace.store";
+import type { Document } from "@/types";
 
 /**
  * Fetches documents from Supabase and mirrors them into the workspace store.
@@ -11,11 +12,12 @@ import { useWorkspaceStore } from "@/store/workspace.store";
 export const useDocuments = () => {
   const queryClient = useQueryClient();
   const setDocuments = useWorkspaceStore((s) => s.setDocuments);
-  const documents = useWorkspaceStore((s) => s.documents);
+  const syncOpenedTabs = useWorkspaceStore((s) => s.syncOpenedTabs);
+  const storeDocuments = useWorkspaceStore((s) => s.documents);
 
   const query = useQuery({
     queryKey: ["documents"],
-    queryFn: fetchDocuments,
+    queryFn: fetchDocumentsFromApi,
     refetchInterval: (q) => {
       const hasProcessing = (q.state.data ?? []).some(
         (d) => d.status === "processing" || d.status === "uploading"
@@ -27,15 +29,30 @@ export const useDocuments = () => {
   useEffect(() => {
     if (query.data) {
       setDocuments(query.data);
+      syncOpenedTabs(query.data.map((document) => document.id));
     }
-  }, [query.data, setDocuments]);
+  }, [query.data, setDocuments, syncOpenedTabs]);
 
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: ["documents"] });
+  const documents = query.data ?? storeDocuments;
+
+  const invalidate = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: ["documents"] }),
+    [queryClient]
+  );
+
+  const removeDocument = useCallback(
+    async (document: Document) => {
+      await deleteDocument(document);
+      await invalidate();
+    },
+    [invalidate]
+  );
 
   return {
     documents,
     isLoading: query.isLoading,
     error: query.error,
     invalidate,
+    removeDocument,
   };
 };

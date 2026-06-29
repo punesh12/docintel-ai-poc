@@ -1,8 +1,9 @@
 import { v4 as uuidv4 } from "uuid";
 import {
   getSupabaseClient,
-  getSupabaseAnonKey,
+  getServerStorageClient,
   getSupabaseUrl,
+  getSupabaseAnonKey,
   isSupabaseConfigured,
   STORAGE_BUCKET,
 } from "@/lib/supabase";
@@ -181,19 +182,111 @@ export async function deletePdfFromStorage(storagePath: string): Promise<void> {
   if (error) throw new Error(error.message);
 }
 
+export interface StorageListedObject {
+  path: string;
+  name: string;
+  size: number;
+  updatedAt: string;
+}
+
+function isStorageFile(item: { id: string | null }): boolean {
+  return Boolean(item.id);
+}
+
+function getStorageListingClient() {
+  return typeof window === "undefined" ? getServerStorageClient() : getSupabaseClient();
+}
+
+/** Lists every file in the storage bucket with basic metadata. */
+export async function listAllStorageObjects(): Promise<StorageListedObject[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  const supabase = getStorageListingClient();
+  const objects: StorageListedObject[] = [];
+
+  async function walk(prefix: string): Promise<void> {
+    const { data, error } = await supabase.storage
+      .from(STORAGE_BUCKET)
+      .list(prefix, { limit: 1000 });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    for (const item of data ?? []) {
+      const itemPath = prefix ? `${prefix}/${item.name}` : item.name;
+
+      if (isStorageFile(item)) {
+        const metadata = item.metadata as { size?: number } | null;
+        objects.push({
+          path: itemPath,
+          name: item.name,
+          size: metadata?.size ?? 0,
+          updatedAt: item.updated_at ?? item.created_at ?? new Date().toISOString(),
+        });
+        continue;
+      }
+
+      if (item.name) {
+        await walk(itemPath);
+      }
+    }
+  }
+
+  await walk("");
+  return objects;
+}
+
+/** @deprecated Prefer `listAllStorageObjects` when metadata is needed. */
+export async function listAllStorageObjectPaths(): Promise<Set<string>> {
+  const objects = await listAllStorageObjects();
+  return new Set(objects.map((object) => object.path));
+}
+
+/** Returns false when the PDF was removed from the bucket but DB metadata remains. */
+export async function storageObjectExists(storagePath: string): Promise<boolean> {
+  if (!isSupabaseConfigured()) return true;
+
+  const slash = storagePath.lastIndexOf("/");
+  const folder = slash >= 0 ? storagePath.slice(0, slash) : "";
+  const fileName = slash >= 0 ? storagePath.slice(slash + 1) : storagePath;
+
+  const supabase = getStorageListingClient();
+  const { data, error } = await supabase.storage
+    .from(STORAGE_BUCKET)
+    .list(folder, { search: fileName, limit: 100 });
+
+  if (!error && (data ?? []).some((item) => Boolean(item.id) && item.name === fileName)) {
+    return true;
+  }
+
+  if (process.env.NEXT_PUBLIC_SUPABASE_STORAGE_PUBLIC !== "false") {
+    try {
+      const url = getStoragePublicUrl(storagePath);
+      const response = await fetch(url, { method: "HEAD", cache: "no-store" });
+      return response.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  return false;
+}
+
 export async function triggerAIProcessing(documentId: string): Promise<void> {
   if (!isSupabaseConfigured()) {
     await new Promise((resolve) => setTimeout(resolve, 800));
     return;
   }
 
-  const supabase = getSupabaseClient();
-  const { error } = await supabase.functions.invoke("process-document", {
-    body: { documentId },
+  const response = await fetch("/api/process-document", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ documentId }),
   });
 
-  if (error) {
-    // Edge function optional — mark ready when processing isn't deployed
-    console.warn("process-document function unavailable:", error.message);
+  if (!response.ok) {
+    const body = (await response.json().catch(() => ({}))) as { error?: string };
+    throw new Error(body.error ?? `Processing failed (${response.status})`);
   }
 }
